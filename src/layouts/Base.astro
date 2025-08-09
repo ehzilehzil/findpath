@@ -1,0 +1,23 @@
+---
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+        <script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/index.min.js" is:inline></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/jspreadsheet.min.css" type="text/css" />
+        <script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js" is:inline></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" type="text/css" />
+		<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f082bd589ad1b9501b47fbe049621a6c" is:inline></script>
+		<script src="/tsp.js" is:inline></script>
+		<script src="/utils.js" is:inline></script>
+		<title>경로 설정</title>
+	</head>
+	<body>
+		<slot />
+        
+	</body>
+</html>

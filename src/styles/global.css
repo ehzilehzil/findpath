@@ -1,0 +1,15 @@
+@import "tailwindcss";
+.btn {
+    @apply bg-blue-500 text-white font-bold py-2 px-4 rounded-lg;
+    @apply hover:bg-blue-600 active:bg-blue-700 transition duration-300 ease-in-out;
+    @apply cursor-pointer;
+}
+ol {
+    @apply list-decimal list-outside pl-6 space-y-2 text-gray-700 w-full;
+}
+a {
+    @apply text-blue-500 underline;
+}
+.warn {
+    @apply text-red-500;
+}
