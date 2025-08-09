@@ -53,7 +53,9 @@ import Base from "../layouts/Base.astro";
 		},
 		onbeforeinsertcolumn: function (_instance, columns) {
 			if (columns => MAX_COLS - 1) return false;
-		}
+		},
+		onbeforedeleterow: function (_instance, _rows) { return false; },
+		onbeforedeletecolumn: function (_instance, _columns) { return false; },
 	});
 
 	const map = document.getElementById("map");
