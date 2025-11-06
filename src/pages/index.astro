@@ -5,16 +5,18 @@ import Base from "../layouts/Base.astro";
 <Base>
 	<div class="fixed top-0 right-0 bottom-0 left-0 flex text-[12px]">
 		<div class="flex-none basis-[480px] p-1 border-r flex-col">
-			<div class="flex-none basis-[120px] flex justify-center items-center gap-x-10">
-				<button class="btn" id="showdocs">설명서 보여줘</button>
-				<button class="btn" id="findpath">최적경로 찾아줘</button>
-				<button class="btn" id="showoverlays">마커표시자세히</button>
+			<div class="h-full w-full overflow-auto">
+				<div class="flex-none basis-[120px] flex justify-center items-center gap-x-10">
+					<button class="btn" id="showdocs">설명서 보여줘</button>
+					<button class="btn" id="findpath">최적경로 찾아줘</button>
+					<button class="btn" id="showoverlays">마커표시자세히</button>
+				</div>
+				<div class="h-8 my-2">
+					<div class="inline">📢 </div>
+					<div id="msg" class="inline">안녕하세요, D2R사업부 빠이팅!!</div>
+				</div>
+				<div id="spreadsheet" class="w-full"></div>
 			</div>
-			<div class="h-8 my-2">
-				<div class="inline">📢 </div>
-				<div id="msg" class="inline">안녕하세요, D2R사업부 빠이팅!!</div>
-			</div>
-			<div id="spreadsheet" class="w-full"></div>
 		</div>
 		<div class="grow shrink-0 basis-0 p-1 text-[12px]">
 			<div id="map" class="h-full w-full"></div>
@@ -25,13 +27,15 @@ import Base from "../layouts/Base.astro";
 			<li>위 첫번째 칸에 출발지점의 "업체명", "주소" 삽입</li>
 			<li>두번째 칸부터 가야할 곳을 랜덤하게 삽입(엑셀에서 복&붙 하면 편함)</li>
 			<li>출발지점 포함 최대 15개 입력만 가능</li>
-			<li>표 아래 "최적경로 찾아줘" 버튼 클릭</li>
+			<li>좌상단 중간 "최적경로 찾아줘" 버튼 클릭</li>
 			<li><a href="https://namu.wiki/w/%EC%99%B8%ED%8C%90%EC%9B%90%20%EC%88%9C%ED%9A%8C%20%EB%AC%B8%EC%A0%9C">TSP</a> 알고리즘으로 최적 경로 판단(업체명 또는 주소칸이 비어있을 경우 그 줄은 무시)</li>
-			<li>아래 표에 출발지점부터 방문해야할 순서대로 정렬됨</li>
+			<li>아래 표에 출발지점부터 방문해야할 순서대로 정렬렬됨</li>
 			<li>만일, KAKAO 지도에서 인식못하는 주소 있을 경우, 붉은글씨로 에러</li>
+			<li>최적경로 찾으면 지도에 방문순서대로 마커가 표시됨</li>
+			<li>좌상단 오른쪽 "마커표시자세히" 버튼 클릭하면 마커에 부가설명 표시되거나 사라짐</li>
 		</ol>
 		<div class="mt-4 text-blue-600">
-			다시 버튼을 누르면 이 설명서가 닫힙니다.
+			다시 "설명서 보여줘" 버튼을 누르면 이 설명서가 닫힙니다.
 		</div>
 	</div>
 </Base>
@@ -227,13 +231,13 @@ import Base from "../layouts/Base.astro";
 		try {
 			kakao_map.panTo(new kakao.maps.LatLng(tar[0][4], tar[0][3]));
 
-			markers = tar.map(([i, a, b, x, y]) => new kakao.maps.Marker({
+			markers = tar.map(([_i, a, b, x, y], i) => new kakao.maps.Marker({
 				map: kakao_map,
 				position: new kakao.maps.LatLng(y, x),
 				// title: a + "\n" + b,
 				// image: new kakao.maps.MarkerImage(marker_image(tag), new kakao.maps.Size(icon_size, icon_size)),
 				image: new kakao.maps.MarkerImage(marker_image(i), new kakao.maps.Size(32, 32)),
-			}));
+			}));f
 
 			polyline = new kakao.maps.Polyline({
 				map: kakao_map,
