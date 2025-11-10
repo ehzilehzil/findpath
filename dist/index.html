@@ -1,6 +1,25 @@
-<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/index.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/jspreadsheet.min.css" type="text/css"><script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" type="text/css"><script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f082bd589ad1b9501b47fbe049621a6c"></script><script src="tsp.js"></script><script src="utils.js"></script><title>경로 설정</title><link rel="stylesheet" href="/findpath/_astro/index.lXW6FR9z.css"><script type="module" src="/findpath/_astro/page.BvKxy2Uc.js"></script></head> <body>  <div class="fixed top-0 right-0 bottom-0 left-0 flex"> <div class="flex-none basis-[480px] p-1 border-r flex-col"> <div class="flex-none basis-[120px] flex justify-center items-center"> <ol> <li>위 첫번째 칸에 출발지점의 "업체명", "주소" 삽입</li> <li>두번째 칸부터 가야할 곳을 랜덤하게 삽입(엑셀에서 복&붙 하면 편함)</li> <li>출발지점 포함 최대 15개 입력만 가능</li> <li>표 아래 "최적경로 찾아줘" 버튼 클릭</li> <li><a href="https://namu.wiki/w/%EC%99%B8%ED%8C%90%EC%9B%90%20%EC%88%9C%ED%9A%8C%20%EB%AC%B8%EC%A0%9C">TSP</a> 알고리즘으로 최적 경로 판단(업체명 또는 주소칸이 비어있을 경우 그 줄은 무시)</li> <li>아래 표에 출발지점부터 방문해야할 순서대로 정렬됨</li> <li>만일, KAKAO 지도에서 인식못하는 주소 있을 경우, 붉은글씨로 에러</li> </ol> </div> <div class="grow shrink-0 basis-0"> <div id="spreadsheet" class="w-full"></div> <div class="text-center mb-3"> <button class="btn" id="findpath">최적경로 찾아줘</button> </div> <div id="msg"></div> </div> </div> <div class="grow shrink-0 basis-0 p-1"> <div id="map" class="h-full w-full"></div> </div> </div>  </body></html> <script>
+<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/index.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/jspreadsheet.min.css" type="text/css"><script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" type="text/css"><script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f082bd589ad1b9501b47fbe049621a6c"></script><script src="tsp.js"></script><script src="utils.js"></script><title>경로 설정</title><link rel="stylesheet" href="/findpath-test/_astro/index.wyqiL1ss.css"><script type="module" src="/findpath-test/_astro/page.BvKxy2Uc.js"></script></head> <body class="hiddenoverlays">  <div class="fixed top-0 right-0 bottom-0 left-0 flex text-[12px]"> <div class="flex-none basis-[480px] p-1 border-r flex-col"> <div class="h-full w-full overflow-auto"> <div class="flex-none basis-[120px] flex justify-center items-center gap-x-10"> <button class="btn" id="showdocs">설명서 보여줘</button> <button class="btn" id="findpath">최적경로 찾아줘</button> <button class="btn" id="showoverlays">마커표시자세히</button> </div> <div class="h-8 my-2"> <div class="inline">📢 </div> <div id="msg" class="inline">안녕하세요, D2R사업부 빠이팅!!</div> </div> <div id="spreadsheet" class="w-full"></div> </div> </div> <div class="grow shrink-0 basis-0 p-1 text-[12px]"> <div id="map" class="h-full w-full"></div> </div> </div> <div id="docs" class="hidden fixed top-[60px] left-[2px] w-[480px] bg-white border-2 rounded z-[9999]"> <ol> <li>위 첫번째 칸에 출발지점의 "업체명", "주소" 삽입</li> <li>두번째 칸부터 가야할 곳을 랜덤하게 삽입(엑셀에서 복&붙 하면 편함)</li> <li>출발지점 포함 최대 15개 입력만 가능</li> <li>좌상단 중간 "최적경로 찾아줘" 버튼 클릭</li> <li><a href="https://namu.wiki/w/%EC%99%B8%ED%8C%90%EC%9B%90%20%EC%88%9C%ED%9A%8C%20%EB%AC%B8%EC%A0%9C">TSP</a> 알고리즘으로 최적 경로 판단(업체명 또는 주소칸이 비어있을 경우 그 줄은 무시)</li> <li>아래 표에 출발지점부터 방문해야할 순서대로 정렬렬됨</li> <li>만일, KAKAO 지도에서 인식못하는 주소 있을 경우, 붉은글씨로 에러</li> <li>최적경로 찾으면 지도에 방문순서대로 마커가 표시됨</li> <li>좌상단 오른쪽 "마커표시자세히" 버튼 클릭하면 마커에 부가설명 표시되거나 사라짐</li> </ol> <div class="mt-4 text-blue-600">
+다시 "설명서 보여줘" 버튼을 누르면 이 설명서가 닫힙니다.
+</div> </div>  </body></html>  <script>
+	const $showdocs = document.querySelector("#showdocs");
+	const $docs = document.querySelector("#docs");
+	$showdocs.onclick = (e) => {
+		$docs.classList.toggle("hidden");
+	};
 
-	const MAX_ROWS = 15;
+	const $showoverlays = document.querySelector("#showoverlays");
+	$showoverlays.onclick = (e) => {
+		const $overlays = document.querySelectorAll(".overlay");
+		if ($overlays.length > 0) {
+			document.body.classList.toggle("hiddenoverlays");
+		}
+		// for (let i = 0; i < $overlays.length; i++) {
+		// 	$overlays[i].classList.toggle("hidden");
+		// }
+	};
+	
+
+	const MAX_ROWS = 30;
 	const MAX_COLS = 2;
 	const el = document.getElementById("spreadsheet");
 	const findpath = document.getElementById("findpath");
@@ -14,7 +33,7 @@
 			{ type: "text", title: "업체명", width: 90 },
 			{ type: "text", title: "주소", width: el.clientWidth - 50 - 90 },
 		],
-		minDimensions: [2, 15],
+		minDimensions: [2, MAX_ROWS],
 		contextmenu: {},
 		onbeforeinsertrow: function (_instance, rows) {
 			if (rows => MAX_ROWS - 1) return false;
@@ -106,7 +125,10 @@
 
 
 		// tar 배열에 아무것도 없다면 그냥 종료
-		if (tar.length === 0) return; 
+		if (tar.length === 0) {
+			msg.innerHTML = "동선을 추적할 업체명과 주소가 없습니다.";
+			return;
+		} 
 
 
 
@@ -172,10 +194,12 @@
 		try {
 			kakao_map.panTo(new kakao.maps.LatLng(tar[0][4], tar[0][3]));
 
-			markers = tar.map(([i, a, b, x, y]) => new kakao.maps.Marker({
+			markers = tar.map(([_i, a, b, x, y], i) => new kakao.maps.Marker({
 				map: kakao_map,
 				position: new kakao.maps.LatLng(y, x),
-				title: a + "\n" + b,
+				// title: a + "\n" + b,
+				// image: new kakao.maps.MarkerImage(marker_image(tag), new kakao.maps.Size(icon_size, icon_size)),
+				image: new kakao.maps.MarkerImage(marker_image(i), new kakao.maps.Size(32, 32)),
 			}));
 
 			polyline = new kakao.maps.Polyline({
@@ -187,6 +211,24 @@
 				strokeOpacity: 0.6,
 			});
 
+			tar.forEach(([i, a, b, x, y]) => {
+				let content = `<div class="overlay\" style="background:rgba(255,255,255,0.9); border-radius:4px; border:1px solid; padding:0 2px;">`;
+				content += `${a}<br/>${b}`;
+				content += `</div>`;
+
+				let overlay = new kakao.maps.CustomOverlay({
+					map: kakao_map,
+					position: new kakao.maps.LatLng(y, x),
+					content: content,
+					xAnchor: 0,
+					yAnchor: 0.1,
+					// zIndex: 9999,
+				});
+			});
+
+			
+			
+
 		} catch(e) {
 			msg.innerHTML = "카카오 지도 이동 경로 지도 표시에 기술적인 문제가 발생했습니다.";
 			console.log(e);
@@ -194,8 +236,15 @@
 		}
 	};
 
-
-	
+	function marker_image(i) {
+		return 'data:image/svg+xml,' + encodeURIComponent(
+			`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cy='50' cx='50' r='50' stroke-width='0' stroke='#000' fill='rgba(0,255,0,0.7)'/>
+				<text x="51" y="45" font-size="80" text-anchor="middle" alignment-baseline="central" fill="#000">
+					${i + 1}
+				</text>	
+			</svg>`
+		);
+	}
 	
 	
 </script>

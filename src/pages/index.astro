@@ -40,6 +40,12 @@ import Base from "../layouts/Base.astro";
 	</div>
 </Base>
 
+<style is:global>
+	body.hiddenoverlays .overlay {
+		display: none !important;
+	}
+</style>
+
 <script is:inline>
 	const $showdocs = document.querySelector("#showdocs");
 	const $docs = document.querySelector("#docs");
@@ -50,9 +56,12 @@ import Base from "../layouts/Base.astro";
 	const $showoverlays = document.querySelector("#showoverlays");
 	$showoverlays.onclick = (e) => {
 		const $overlays = document.querySelectorAll(".overlay");
-		for (let i = 0; i < $overlays.length; i++) {
-			$overlays[i].classList.toggle("hidden");
+		if ($overlays.length > 0) {
+			document.body.classList.toggle("hiddenoverlays");
 		}
+		// for (let i = 0; i < $overlays.length; i++) {
+		// 	$overlays[i].classList.toggle("hidden");
+		// }
 	};
 	
 
@@ -237,7 +246,7 @@ import Base from "../layouts/Base.astro";
 				// title: a + "\n" + b,
 				// image: new kakao.maps.MarkerImage(marker_image(tag), new kakao.maps.Size(icon_size, icon_size)),
 				image: new kakao.maps.MarkerImage(marker_image(i), new kakao.maps.Size(32, 32)),
-			}));f
+			}));
 
 			polyline = new kakao.maps.Polyline({
 				map: kakao_map,
@@ -249,7 +258,7 @@ import Base from "../layouts/Base.astro";
 			});
 
 			tar.forEach(([i, a, b, x, y]) => {
-				let content = `<div class="overlay hidden" style="background:rgba(255,255,255,0.9); border-radius:4px; border:1px solid; padding:0 2px;">`;
+				let content = `<div class="overlay\" style="background:rgba(255,255,255,0.9); border-radius:4px; border:1px solid; padding:0 2px;">`;
 				content += `${a}<br/>${b}`;
 				content += `</div>`;
 
@@ -259,7 +268,7 @@ import Base from "../layouts/Base.astro";
 					content: content,
 					xAnchor: 0,
 					yAnchor: 0.1,
-					zIndex: 9999,
+					// zIndex: 9999,
 				});
 			});
 
