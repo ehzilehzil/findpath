@@ -12,11 +12,20 @@ import "../styles/global.css";
         <script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js" is:inline></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" type="text/css" />
 		<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f082bd589ad1b9501b47fbe049621a6c" is:inline></script>
+		<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.1/dist/cdn.min.js" defer></script>
 		<script src="tsp.js" is:inline></script>
 		<script src="utils.js" is:inline></script>
+		<script is:inline>
+			document.addEventListener("alpine:init", () => {
+				Alpine.store("global", {
+					docsOpen: false,
+					showDetail: false,
+				});
+			});
+		</script>
 		<title>경로 설정</title>
 	</head>
-	<body class="hiddenoverlays">
+	<body>
 		<slot />
         
 	</body>

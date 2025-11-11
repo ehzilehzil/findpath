@@ -7,9 +7,10 @@ import Base from "../layouts/Base.astro";
 		<div class="flex-none basis-[480px] p-1 border-r flex-col">
 			<div class="h-full w-full overflow-auto">
 				<div class="flex-none basis-[120px] flex justify-center items-center gap-x-10">
-					<button class="btn" id="showdocs">설명서 보여줘</button>
+					<!-- <div x-data> -->
+					<button x-data @click="$store.global.docsOpen = !$store.global.docsOpen;" class="btn" id="showdocs">설명서 보여줘</button>
 					<button class="btn" id="findpath">최적경로 찾아줘</button>
-					<button class="btn" id="showoverlays">마커표시자세히</button>
+					<button x-data @click="$store.global.showDetail = !$store.global.showDetail;" class="btn" id="showoverlays">마커표시자세히</button>
 				</div>
 				<div class="h-8 my-2">
 					<div class="inline">📢 </div>
@@ -19,10 +20,11 @@ import Base from "../layouts/Base.astro";
 			</div>
 		</div>
 		<div class="grow shrink-0 basis-0 p-1 text-[12px]">
+			<div x-data :class="$store.global.showDetail ? '' : 'hiddenoverlays';"></div>
 			<div id="map" class="h-full w-full"></div>
 		</div>
 	</div>
-	<div id="docs" class="hidden fixed top-[60px] left-[2px] w-[480px] bg-white border-2 rounded z-[9999]">
+	<div x-data :class="$store.global.docsOpen ? '' : 'hidden'" id="docs" class="fixed top-[60px] left-[2px] w-[480px] bg-white border-2 rounded z-[9999]">
 		<ol>
 			<li>위 첫번째 칸에 출발지점의 "업체명", "주소" 삽입</li>
 			<li>두번째 칸부터 가야할 곳을 랜덤하게 삽입(엑셀에서 복&붙 하면 편함)</li>
@@ -41,28 +43,28 @@ import Base from "../layouts/Base.astro";
 </Base>
 
 <style is:global>
-	body.hiddenoverlays .overlay {
+	.hiddenoverlays ~ #map .overlay {
 		display: none !important;
 	}
 </style>
 
 <script is:inline>
-	const $showdocs = document.querySelector("#showdocs");
-	const $docs = document.querySelector("#docs");
-	$showdocs.onclick = (e) => {
-		$docs.classList.toggle("hidden");
-	};
+	// const $showdocs = document.querySelector("#showdocs");
+	// const $docs = document.querySelector("#docs");
+	// $showdocs.onclick = (e) => {
+	// 	$docs.classList.toggle("hidden");
+	// };
 
-	const $showoverlays = document.querySelector("#showoverlays");
-	$showoverlays.onclick = (e) => {
-		const $overlays = document.querySelectorAll(".overlay");
-		if ($overlays.length > 0) {
-			document.body.classList.toggle("hiddenoverlays");
-		}
-		// for (let i = 0; i < $overlays.length; i++) {
-		// 	$overlays[i].classList.toggle("hidden");
-		// }
-	};
+	// const $showoverlays = document.querySelector("#showoverlays");
+	// $showoverlays.onclick = (e) => {
+	// 	const $overlays = document.querySelectorAll(".overlay");
+	// 	if ($overlays.length > 0) {
+	// 		document.body.classList.toggle("hiddenoverlays");
+	// 	}
+	// 	// for (let i = 0; i < $overlays.length; i++) {
+	// 	// 	$overlays[i].classList.toggle("hidden");
+	// 	// }
+	// };
 	
 
 	const MAX_ROWS = 30;
