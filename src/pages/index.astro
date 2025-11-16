@@ -46,10 +46,12 @@ import Base from "../layouts/Base.astro";
 	</div>
 	<div x-data :class="$store.global.docsOpen ? '' : 'hidden'" id="docs" class="fixed top-[60px] left-[2px] w-[480px] bg-white border-2 rounded z-[9999]">
 		<ol>
-			<li>위 첫번째 칸에 출발지점의 "업체명", "주소" 삽입</li>
-			<li>두번째 칸부터 가야할 곳을 랜덤하게 삽입(엑셀에서 복&붙 하면 편함)</li>
-			<li>출발지점 포함 최대 15개 입력만 가능</li>
+			<li>위 첫번째 칸부터 방문할 곳의 "업체명", "주소" 삽입</li>
+			<li>최대 100 점 입력 가능</li>
+			<li>방문할 곳 그룹을 나눌 수 있으며, 1 ~ 10개 그룹수 지정 가능</li>
 			<li>좌상단 중간 "최적경로 찾아줘" 버튼 클릭</li>
+			<li><a href="https://namu.wiki/w/%EA%B5%B0%EC%A7%91%20%EB%B6%84%EC%84%9D#s-3.2.1">k-means</a>군집 밥업으로 업체들을 그룹핑</li>
+			<li>거리가 가까운 곳끼리 같은 그룹으로 묶는 방법이기에 방문할 곳의 주소에 따라 특정 그룹으로 업체들이 쏠릴 수 있음</li>
 			<li><a href="https://namu.wiki/w/%EC%99%B8%ED%8C%90%EC%9B%90%20%EC%88%9C%ED%9A%8C%20%EB%AC%B8%EC%A0%9C">TSP</a> 알고리즘으로 최적 경로 판단(업체명 또는 주소칸이 비어있을 경우 그 줄은 무시)</li>
 			<li>아래 표에 출발지점부터 방문해야할 순서대로 정렬렬됨</li>
 			<li>만일, KAKAO 지도에서 인식못하는 주소 있을 경우, 붉은글씨로 에러</li>
@@ -132,6 +134,12 @@ import Base from "../layouts/Base.astro";
 
 	//-> findpath
 	const findpath = async (e) => {
+		//--> 그룹 수 판단
+		let c = +document.querySelector("#countGoups").value;
+		if (Number.isNaN(Number(c)) || +c < 1 || 10 < +c) {
+			msg.innerHTML = "그룹 수는 1~10 까지 숫자만 허용"
+			return;
+		}
 
 
 		//--> 변수 초기화
