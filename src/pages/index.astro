@@ -164,6 +164,17 @@ import Base from "../layouts/Base.astro";
 			return;
 		}
 
+		//--> 좌표찾기 api 호출 화면?
+		let tail2 = ".";
+		let interval2 = setInterval(() => {
+			if (tail2.length % 10 === 0) {
+				tail2 = ".";
+			} else {
+				tail2 += ".";
+			}
+			msg.innerHTML = "업체명 주소로 좌표를 찾고 있습니다" + tail2;
+		}, 500);
+
 		//--> 주소->좌표
 		try {
 			for (let [i, [name, addr, _]] of src.entries()) {
@@ -187,10 +198,12 @@ import Base from "../layouts/Base.astro";
 				});
 			}
 		} catch(e) {
+			clearInterval(interval2);
 			msg.innerHTML = "카카오지도 API 호출 실패";
 			console.log(e);
 			return;
 		}
+		clearInterval(interval2);
 
 		//--> 좌표 검증
 		try {
@@ -275,28 +288,70 @@ import Base from "../layouts/Base.astro";
 				for (let [g, sub_tar] of Object.entries(by_g)) {
 					if (sub_tar.length === 0) continue;
 
-					let res = await fetch('https://apis-navi.kakaomobility.com/v1/waypoints/directions', {
-						method: 'POST',
-						headers: {
-							'Authorization': `KakaoAK ${kakao_key}`,
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({
-							origin: { x: sub_tar[0].lng, y: sub_tar[0].lat },
-							destination: { x: sub_tar[sub_tar.length - 1].lng, y: sub_tar[sub_tar.length - 1].lat },
-							waypoints: sub_tar.map((x) => ({ x: x.lng, y: x.lat })).slice(1, -1),
-							priority: "RECOMMEND"
-						}),
-					});
-					// console.log(res);
-					let obj = await res.json();
+					if (sub_tar.length <= 30) {
+						let res = await fetch('https://apis-navi.kakaomobility.com/v1/waypoints/directions', {
+							method: 'POST',
+							headers: {
+								'Authorization': `KakaoAK ${kakao_key}`,
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({
+								origin: { x: sub_tar[0].lng, y: sub_tar[0].lat },
+								destination: { x: sub_tar[sub_tar.length - 1].lng, y: sub_tar[sub_tar.length - 1].lat },
+								waypoints: sub_tar.map((x) => ({ x: x.lng, y: x.lat })).slice(1, -1),
+								priority: "RECOMMEND"
+							}),
+						});
+						// console.log(res);
+						let obj = await res.json();
 
-					let tmp = collectValuesByKey(obj, "vertexes");
-					tmp = tmp.flat(Infinity);
-					for (let i = 0; i < tmp.length; i += 2) {
+						let tmp = collectValuesByKey(obj, "vertexes");
+						tmp = tmp.flat(Infinity);
+						for (let i = 0; i < tmp.length; i += 2) {
 
-						(paths[g] ||= []).push(new kakao.maps.LatLng(tmp[i + 1], tmp[i]));
+							(paths[g] ||= []).push(new kakao.maps.LatLng(tmp[i + 1], tmp[i]));
+							
+						}
+					} else {
+						let max_index = sub_tar.length - 1;
+						let fromTo = [
+							[0, 29], [29, 58], [58, 87], [87, 116]
+						];
+						for (let [from, to] of fromTo) {
+							let isDone = false;
+							if (max_index <= to) {
+								to = max_index;
+								isDone = true;
+							}
 						
+							let res = await fetch('https://apis-navi.kakaomobility.com/v1/waypoints/directions', {
+								method: 'POST',
+								headers: {
+									'Authorization': `KakaoAK ${kakao_key}`,
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									origin: { x: sub_tar[from].lng, y: sub_tar[from].lat },
+									destination: { x: sub_tar[to].lng, y: sub_tar[to].lat },
+									waypoints: sub_tar.slice(from+1, to-1).map((x) => ({ x: x.lng, y: x.lat })),
+									priority: "RECOMMEND"
+								}),
+							});
+							// console.log(res);
+							let obj = await res.json();
+
+							let tmp = collectValuesByKey(obj, "vertexes");
+							tmp = tmp.flat(Infinity);
+							for (let i = 0; i < tmp.length; i += 2) {
+
+								(paths[g] ||= []).push(new kakao.maps.LatLng(tmp[i + 1], tmp[i]));
+								
+							}
+
+
+
+							if (isDone) break;
+						}
 					}
 				}
 			} catch(e) {

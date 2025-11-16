@@ -1,37 +1,34 @@
-<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/index.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/jspreadsheet.min.css" type="text/css"><script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" type="text/css"><script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f082bd589ad1b9501b47fbe049621a6c"></script><script src="tsp.js"></script><script src="utils.js"></script><title>경로 설정</title><link rel="stylesheet" href="/findpath-test/_astro/index.wyqiL1ss.css"><script type="module" src="/findpath-test/_astro/page.BvKxy2Uc.js"></script></head> <body class="hiddenoverlays">  <div class="fixed top-0 right-0 bottom-0 left-0 flex text-[12px]"> <div class="flex-none basis-[480px] p-1 border-r flex-col"> <div class="h-full w-full overflow-auto"> <div class="flex-none basis-[120px] flex justify-center items-center gap-x-10"> <button class="btn" id="showdocs">설명서 보여줘</button> <button class="btn" id="findpath">최적경로 찾아줘</button> <button class="btn" id="showoverlays">마커표시자세히</button> </div> <div class="h-8 my-2"> <div class="inline">📢 </div> <div id="msg" class="inline">안녕하세요, D2R사업부 빠이팅!!</div> </div> <div id="spreadsheet" class="w-full"></div> </div> </div> <div class="grow shrink-0 basis-0 p-1 text-[12px]"> <div id="map" class="h-full w-full"></div> </div> </div> <div id="docs" class="hidden fixed top-[60px] left-[2px] w-[480px] bg-white border-2 rounded z-[9999]"> <ol> <li>위 첫번째 칸에 출발지점의 "업체명", "주소" 삽입</li> <li>두번째 칸부터 가야할 곳을 랜덤하게 삽입(엑셀에서 복&붙 하면 편함)</li> <li>출발지점 포함 최대 15개 입력만 가능</li> <li>좌상단 중간 "최적경로 찾아줘" 버튼 클릭</li> <li><a href="https://namu.wiki/w/%EC%99%B8%ED%8C%90%EC%9B%90%20%EC%88%9C%ED%9A%8C%20%EB%AC%B8%EC%A0%9C">TSP</a> 알고리즘으로 최적 경로 판단(업체명 또는 주소칸이 비어있을 경우 그 줄은 무시)</li> <li>아래 표에 출발지점부터 방문해야할 순서대로 정렬렬됨</li> <li>만일, KAKAO 지도에서 인식못하는 주소 있을 경우, 붉은글씨로 에러</li> <li>최적경로 찾으면 지도에 방문순서대로 마커가 표시됨</li> <li>좌상단 오른쪽 "마커표시자세히" 버튼 클릭하면 마커에 부가설명 표시되거나 사라짐</li> </ol> <div class="mt-4 text-blue-600">
+<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/index.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/jspreadsheet.min.css" type="text/css"><script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" type="text/css"><script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f082bd589ad1b9501b47fbe049621a6c"></script><script src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.1/dist/cdn.min.js" defer></script><script src="tsp.js"></script><script src="utils.js"></script><title>경로 설정</title><link rel="stylesheet" href="/findpath/_astro/index.CVO5f6MJ.css"><script type="module" src="/findpath/_astro/page.BvKxy2Uc.js"></script></head> <body>  <div class="fixed top-0 right-0 bottom-0 left-0 flex text-[12px]"> <div class="flex-[0_0_480px] p-1 border-r flex-col"> <div class="h-full w-full flex flex-col"> <div class="flex-[0_0_48px] flex justify-center items-center gap-x-10 border-b"> <!-- <div x-data> --> <button x-data @click="$store.global.docsOpen = !$store.global.docsOpen;" class="btn" id="showdocs">설명서 보여줘</button> <button x-data @click="findpath();" class="btn" ">최적경로 찾아줘</button> <button x-data @click="$store.global.showDetail = !$store.global.showDetail;" class="btn" id="showoverlays">마커표시자세히</button> </div> <div x-data class="flex-[0_0_48px] flex gap-x-6 border-b"> <div> <div>그룹 수</div> <input id="countGoups" type="number" x-model.number="$store.global.countGroups" min="1" max="10" class="w-[64px] h-8 px-1 border border-gray-300 rounded text-center text-sm"> </div> <div class="flex flex-wrap gap-x-6 items-center"> <label x-data="{visible: true}"><input type="checkbox" alt="0" :checked="true" :disabled="$store.global.countGroups <= 0" @click="visible=!visible;toggle(0, visible);"><span>그룹 0</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="1" :checked="true" :disabled="$store.global.countGroups <= 1" @click="visible=!visible;toggle(1, visible);"><span>그룹 1</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="2" :checked="true" :disabled="$store.global.countGroups <= 2" @click="visible=!visible;toggle(2, visible);"><span>그룹 2</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="3" :checked="true" :disabled="$store.global.countGroups <= 3" @click="visible=!visible;toggle(3, visible);"><span>그룹 3</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="4" :checked="true" :disabled="$store.global.countGroups <= 4" @click="visible=!visible;toggle(4, visible);"><span>그룹 4</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="5" :checked="true" :disabled="$store.global.countGroups <= 5" @click="visible=!visible;toggle(5, visible);"><span>그룹 5</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="6" :checked="true" :disabled="$store.global.countGroups <= 6" @click="visible=!visible;toggle(6, visible);"><span>그룹 6</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="7" :checked="true" :disabled="$store.global.countGroups <= 7" @click="visible=!visible;toggle(7, visible);"><span>그룹 7</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="8" :checked="true" :disabled="$store.global.countGroups <= 8" @click="visible=!visible;toggle(8, visible);"><span>그룹 8</span></label> <label x-data="{visible: true}"><input type="checkbox" alt="9" :checked="true" :disabled="$store.global.countGroups <= 9" @click="visible=!visible;toggle(9, visible);"><span>그룹 9</span></label> </div> </div> <div class="flex-[0_0_32px]"> <div class="inline">📢 </div> <div id="msg" class="inline">안녕하세요, D2R사업부 빠이팅!!</div> </div> <div class="flex-[1_0_0] overflow-auto"> <div id="spreadsheet" class="w-full"></div> </div> </div> </div> <div class="flex-[1_0_0] basis-0 p-1 text-[12px]"> <div x-data :class="$store.global.showDetail ? '' : 'hiddenoverlays';"></div> <div id="map" class="h-full w-full"></div> </div> </div> <div x-data :class="$store.global.docsOpen ? '' : 'hidden'" id="docs" class="fixed top-[60px] left-[2px] w-[480px] bg-white border-2 rounded z-[9999]"> <ol> <li>위 첫번째 칸에 출발지점의 "업체명", "주소" 삽입</li> <li>두번째 칸부터 가야할 곳을 랜덤하게 삽입(엑셀에서 복&붙 하면 편함)</li> <li>출발지점 포함 최대 15개 입력만 가능</li> <li>좌상단 중간 "최적경로 찾아줘" 버튼 클릭</li> <li><a href="https://namu.wiki/w/%EC%99%B8%ED%8C%90%EC%9B%90%20%EC%88%9C%ED%9A%8C%20%EB%AC%B8%EC%A0%9C">TSP</a> 알고리즘으로 최적 경로 판단(업체명 또는 주소칸이 비어있을 경우 그 줄은 무시)</li> <li>아래 표에 출발지점부터 방문해야할 순서대로 정렬렬됨</li> <li>만일, KAKAO 지도에서 인식못하는 주소 있을 경우, 붉은글씨로 에러</li> <li>최적경로 찾으면 지도에 방문순서대로 마커가 표시됨</li> <li>좌상단 오른쪽 "마커표시자세히" 버튼 클릭하면 마커에 부가설명 표시되거나 사라짐</li> </ol> <div class="mt-4 text-blue-600">
 다시 "설명서 보여줘" 버튼을 누르면 이 설명서가 닫힙니다.
 </div> </div>  </body></html>  <script>
-	const $showdocs = document.querySelector("#showdocs");
-	const $docs = document.querySelector("#docs");
-	$showdocs.onclick = (e) => {
-		$docs.classList.toggle("hidden");
-	};
 
-	const $showoverlays = document.querySelector("#showoverlays");
-	$showoverlays.onclick = (e) => {
-		const $overlays = document.querySelectorAll(".overlay");
-		if ($overlays.length > 0) {
-			document.body.classList.toggle("hiddenoverlays");
-		}
-		// for (let i = 0; i < $overlays.length; i++) {
-		// 	$overlays[i].classList.toggle("hidden");
-		// }
-	};
-	
+	// alpinejs 전역변수 초기화
+	document.addEventListener("alpine:init", () => {
+		Alpine.store("global", {
+			docsOpen: false,		// 설명서 토글
+			showDetail: false,		// 마커 세부사항 표시 토글
+			countGroups: 7,			// mtps 에서 영업사원 수 초기값
+			get range() {			// countGoups 값에 따라 재계산 getter
+				return Array.from({length: Math.min(10, Math.max(1, this.countGroups))}, (_, i) => i + 1);
+			},
+		});
+	});
 
-	const MAX_ROWS = 30;
-	const MAX_COLS = 2;
+	// jspreadsheet 초기화
+	const MAX_ROWS = 100;
+	const MAX_COLS = 3;
 	const el = document.getElementById("spreadsheet");
-	const findpath = document.getElementById("findpath");
+	// const findpath = document.getElementById("findpath");
 	const msg = document.getElementById("msg");
-	const kakao_key = "5584c9f9d2b08e7975a38029e42d9790";
+	
 
 	const spreadsheet = jspreadsheet(el, {
 		data: [],
 		width: "100%",
 		columns: [
 			{ type: "text", title: "업체명", width: 90 },
-			{ type: "text", title: "주소", width: el.clientWidth - 50 - 90 },
+			{ type: "text", title: "주소", width: el.clientWidth - 50 - 90 - 50 },
+			{ type: "text", title: "그룹", width: 50, readOnly: true }
 		],
 		minDimensions: [2, MAX_ROWS],
 		contextmenu: {},
@@ -45,71 +42,107 @@
 		onbeforedeletecolumn: function (_instance, _columns) { return false; },
 	});
 
+	const kakao_key = "5584c9f9d2b08e7975a38029e42d9790";
 	const map = document.getElementById("map");
-	let markers = []; // 지도 마커들
-	let routing = []; // 이동경로 좌표들
-	let polyline = undefined; // 이동경로 좌표들로 만든 지도 표시용 객체
 	const map_options = {
 		center: new kakao.maps.LatLng(37.5820926424763, 126.888984720113),
 		level: 7,
 	};
 	const kakao_map = new kakao.maps.Map(map, map_options);
 
-	
-	findpath.onclick = async (e) => {
-		msg.innerHTML = "";
+	let markers = {}; // 마커
+	let paths = {}; // 경로추적 보조
+	let polylines = {}; // 경로표시
+	let overlays = {}; // 오버레이
+
+
+	const toggle = (g, visible) => {
+		markers[g]?.forEach((x) => x.setMap(visible ? kakao_map : null));
+		polylines[g]?.setMap(visible ? kakao_map : null);
+		overlays[g]?.forEach((x) => x.setMap(visible ? kakao_map : null));
+	};
+
+	//-> findpath
+	const findpath = async (e) => {
+
+
+		//--> 변수 초기화
+		msg.innerHTML = "이동경로 찾기 시작"; 
 		let src = spreadsheet.getData();
 		let tar = [];
 
-		// 스프레드시트 스타일 초기화
+		//--> 스프레드시트 스타일 초기화
 		try {
 			const all_tr = el.querySelectorAll("table tbody tr");
 			for (let x of all_tr) x.classList.remove("warn");
 		} catch(e) {
-			msg.innerHTML = "스프레드시트에 기술적인 문제가 발생했습니다.";
-			console.log(e);
-			return;
-		}
-
-		// 지도 초기화 (기존 마커, 이동경로 삭제)
-		try {
-			markers.forEach((marker) => { marker.setMap(null); });
-			polyline?.setMap(null);
-			polyline = undefined;
-			routing = [];
-		} catch(e) {
-			msg.innerHTML = "기존 마커/이동경로 삭제하는 과정에서 기술적인 문제가 발생했습니다.";
+			msg.innerHTML = "스프레드시트 초기화 실패";
 			console.log(e);
 			return;
 		}
 		
-		// 주소->좌표 변환
+		//--> 지도 초기화
 		try {
-			for (let [i, [x, y]] of src.entries()) {
-				if (x.trim().length === 0 || y.trim().length === 0) continue;
+			for (let [g, sub] of Object.entries(markers)) sub.forEach((x) => x.setMap(null));
+			for (let [g, sub] of Object.entries(polylines)) sub.setMap(null); //sub.forEach((y) => y.setMap(null));
+			for (let [g, sub] of Object.entries(overlays)) sub.forEach((z) => z.setMap(null));
+			markers = {};
+			paths = {};
+			polylines = {};
+			overlays = {};
+		} catch(e) {
+			msg.innerHTML = "카카오지도 초기화 실패";
+			console.log(e);
+			return;
+		}
 
-				let res = await fetch(`https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(y)}`, {
+		//--> 좌표찾기 api 호출 화면?
+		let tail2 = ".";
+		let interval2 = setInterval(() => {
+			if (tail2.length % 10 === 0) {
+				tail2 = ".";
+			} else {
+				tail2 += ".";
+			}
+			msg.innerHTML = "업체명 주소로 좌표를 찾고 있습니다" + tail2;
+		}, 500);
+
+		//--> 주소->좌표
+		try {
+			for (let [i, [name, addr, _]] of src.entries()) {
+				if (name.trim().length === 0 || addr.trim().length === 0) continue;
+
+				let res = await fetch(`https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(addr)}`, {
 					method: "GET",
-					headers: {
+					headers: { 
 						Authorization: `KakaoAK ${kakao_key}`,
 					}
 				});
 				let obj = await res.json();
 
-				tar.push([i, x, y, obj?.documents?.[0]?.x, obj?.documents?.[0]?.y]);
+				tar.push({
+					i,
+					name,
+					addr,
+					lng: +obj?.documents?.[0]?.x,
+					lat: +obj?.documents?.[0]?.y,
+					g: 0,
+				});
 			}
 		} catch(e) {
-			msg.innerHTML = "주소->좌표 변환하는 KAKAO MAP API에 뭔가 문제가 있습니다.";
+			clearInterval(interval2);
+			msg.innerHTML = "카카오지도 API 호출 실패";
 			console.log(e);
 			return;
 		}
+		clearInterval(interval2);
 
-		// 변환된 좌표에 문제가 없는지 검사
+		//--> 좌표 검증
 		try {
 			let is_err = false;
 
-			for (let [i, _x, _y, z, _w] of tar) {
-				if (z === undefined) {
+			for (let { i, lng } of tar) {
+				if (!lng) {
 					is_err = true;
 					el.querySelector(`table tbody tr[data-y="${i}"]`).classList.add("warn");
 				}
@@ -118,133 +151,225 @@
 			if (is_err) throw new Error("주소 오류");
 
 		} catch(e) {
-			msg.innerHTML = "카카오 지도가 인식을 못하는 주소가 있어 수정이 필요합니다.";
+			msg.innerHTML = "카카오지도 API 주소 인식 실패 (아래 붉은색 표시 부분 확인해주세요.)";
 			console.log(e);
 			return;
 		}
 
-
-		// tar 배열에 아무것도 없다면 그냥 종료
+		//--> tar 배열이 비어있다면 그냥 종료
 		if (tar.length === 0) {
-			msg.innerHTML = "동선을 추적할 업체명과 주소가 없습니다.";
-			return;
-		} 
-
-
-
-		// TSP 알고리즘 적용
-		try {
-
-			msg.innerHTML = "최적 경로를 찾고 있습니다....";
-
-			tar = solveTSP(tar);
-			// console.log(tar);
-			// console.log(res);
-		} catch(e) {
-			msg.innerHTML = "TSP 알고리즘 적용에 문제가 생겼습니다.";
+			msg.innerHTML = "동선을 추적할 업체명, 주소 없음";
 			console.log(e);
-			return;
+			return ;
 		}
 
-		// 최적경로를 스프레드시트에 다시 표시
-		try {
-			spreadsheet.setData(tar.map(([_i, a, b, _x, _y]) => [a, b]));
+		//--> 최적 경로 찾기 로딩화면?
+		let tail = ".";
+		let interval = setInterval(() => {
+			if (tail.length % 10 === 0) {
+				tail = ".";
+			} else {
+				tail += ".";
+			}
+			msg.innerHTML = "최적 경로를 찾고 있습니다" + tail;
+		}, 500);
 
-			msg.innerHTML = "최적 경로를 찾았습니다. 위부터 순서대로 방문하면 됩니다.";
-		} catch(e) {
-			msg.innerHTML = "스프레드시트에 기술적인 문제가 발생했습니다.";
-			console.log(e);
-			return;
-		}
-		
-		// 실제 이동 경로 추적
-		try {
-			const body = {
-				origin: { x: tar[0][3], y: tar[0][4] },
-				destination: { x: tar[tar.length - 1][3], y: tar[tar.length - 1][4] },
-				waypoints: tar.map(([_i, a, _b, x, y]) => ({ name: a, x: x, y: y })).slice(1, -1),
-				priority: "RECOMMEND"
+		//--> 비동기로 mtsp 알고리즘 실행
+		(async () => {
+
+			let data = {
+				items: tar,
+				k: +document.querySelector("#countGoups").value, //Alpine.store("global").countGroups,
 			};
 
-			let res = await fetch('https://apis-navi.kakaomobility.com/v1/waypoints/directions', {
-				method: 'POST',
-				headers: {
-					'Authorization': `KakaoAK ${kakao_key}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(body)
-			});
-			let obj = await res.json();
-
-			// console.log(obj);
-
-			let tmp = collectValuesByKey(obj, "vertexes");
-			tmp = tmp.flat(Infinity);
-			for (let i = 0; i < tmp.length; i += 2) {
-				routing.push(new kakao.maps.LatLng(tmp[i + 1], tmp[i]));
-			}
-			
-		} catch(e) {
-			msg.innerHTML = "카카오 지도 이동 경로 API 에 기술적인 문제가 발생했습니다.";
-			console.log(e);
-			return;
-		}
-
-		// 지도에 마커/이동경로 표시
-		try {
-			kakao_map.panTo(new kakao.maps.LatLng(tar[0][4], tar[0][3]));
-
-			markers = tar.map(([_i, a, b, x, y], i) => new kakao.maps.Marker({
-				map: kakao_map,
-				position: new kakao.maps.LatLng(y, x),
-				// title: a + "\n" + b,
-				// image: new kakao.maps.MarkerImage(marker_image(tag), new kakao.maps.Size(icon_size, icon_size)),
-				image: new kakao.maps.MarkerImage(marker_image(i), new kakao.maps.Size(32, 32)),
-			}));
-
-			polyline = new kakao.maps.Polyline({
-				map: kakao_map,
-				path: routing,
-				strokeWidth: 5,
-				strokeColor: "#000000",
-				strokeStyle: "solid",
-				strokeOpacity: 0.6,
-			});
-
-			tar.forEach(([i, a, b, x, y]) => {
-				let content = `<div class="overlay\" style="background:rgba(255,255,255,0.9); border-radius:4px; border:1px solid; padding:0 2px;">`;
-				content += `${a}<br/>${b}`;
-				content += `</div>`;
-
-				let overlay = new kakao.maps.CustomOverlay({
-					map: kakao_map,
-					position: new kakao.maps.LatLng(y, x),
-					content: content,
-					xAnchor: 0,
-					yAnchor: 0.1,
-					// zIndex: 9999,
+			//---> Deno mtsp API 호출하여 mtsp 알고리즘 적용
+			try {
+				let res = await fetch("https://ezapi.ehzilehzil.deno.net/mtsp", {
+					method: "POST",
+					headers: { 
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(data),
 				});
-			});
+				if (!res.ok) throw new Error();
 
-			
-			
+				tar = await res.json();
+			} catch(e) {
+				msg.innerHTML = "Deno mtsp API 호출 실패";
+				console.log(e);
+				return;
+			}
 
-		} catch(e) {
-			msg.innerHTML = "카카오 지도 이동 경로 지도 표시에 기술적인 문제가 발생했습니다.";
-			console.log(e);
-			return;
-		}
-	};
+			//--> 최적경로를 스프레드시트에 다시 표시
+			try {
+				spreadsheet.setData(tar.map((x) => [x.name, x.addr, x.g]));
+			} catch(e) {
+				msg.innerHTML = "스프레드시트에 기술적 문제 발생";
+				console.log(e);
+				return;
+			}
 
-	function marker_image(i) {
+			//--> 이동경로 추적
+			let by_g;
+			try {
+				by_g = tar.reduce((a, x) => {
+					(a[x.g] ||= []).push(x);
+					return a;
+				}, {});
+
+				for (let [g, sub_tar] of Object.entries(by_g)) {
+					if (sub_tar.length === 0) continue;
+
+					if (sub_tar.length <= 30) {
+						let res = await fetch('https://apis-navi.kakaomobility.com/v1/waypoints/directions', {
+							method: 'POST',
+							headers: {
+								'Authorization': `KakaoAK ${kakao_key}`,
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({
+								origin: { x: sub_tar[0].lng, y: sub_tar[0].lat },
+								destination: { x: sub_tar[sub_tar.length - 1].lng, y: sub_tar[sub_tar.length - 1].lat },
+								waypoints: sub_tar.map((x) => ({ x: x.lng, y: x.lat })).slice(1, -1),
+								priority: "RECOMMEND"
+							}),
+						});
+						// console.log(res);
+						let obj = await res.json();
+
+						let tmp = collectValuesByKey(obj, "vertexes");
+						tmp = tmp.flat(Infinity);
+						for (let i = 0; i < tmp.length; i += 2) {
+
+							(paths[g] ||= []).push(new kakao.maps.LatLng(tmp[i + 1], tmp[i]));
+							
+						}
+					} else {
+						let max_index = sub_tar.length - 1;
+						let fromTo = [
+							[0, 29], [29, 58], [58, 87], [87, 116]
+						];
+						for (let [from, to] of fromTo) {
+							let isDone = false;
+							if (max_index <= to) {
+								to = max_index;
+								isDone = true;
+							}
+						
+							let res = await fetch('https://apis-navi.kakaomobility.com/v1/waypoints/directions', {
+								method: 'POST',
+								headers: {
+									'Authorization': `KakaoAK ${kakao_key}`,
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									origin: { x: sub_tar[from].lng, y: sub_tar[from].lat },
+									destination: { x: sub_tar[to].lng, y: sub_tar[to].lat },
+									waypoints: sub_tar.slice(from+1, to-1).map((x) => ({ x: x.lng, y: x.lat })),
+									priority: "RECOMMEND"
+								}),
+							});
+							// console.log(res);
+							let obj = await res.json();
+
+							let tmp = collectValuesByKey(obj, "vertexes");
+							tmp = tmp.flat(Infinity);
+							for (let i = 0; i < tmp.length; i += 2) {
+
+								(paths[g] ||= []).push(new kakao.maps.LatLng(tmp[i + 1], tmp[i]));
+								
+							}
+
+
+
+							if (isDone) break;
+						}
+					}
+				}
+			} catch(e) {
+				msg.innerHTML = "카카오지도 경로찾기 API에 기술적 문제 발생";
+				console.log(e);
+				return;
+			}
+
+			//--> 카카오지도에 마커+이동경로+오버레이 표시
+			try {
+				kakao_map.panTo(new kakao.maps.LatLng(tar[0].lat, tar[0].lng));
+
+				
+				for (let [g, sub_tar] of Object.entries(by_g)) {
+					if (sub_tar.length === 0) continue;
+
+					let i = 1;
+
+					markers[g] = sub_tar.map((x) => new kakao.maps.Marker({
+						map: kakao_map,
+						position: new kakao.maps.LatLng(x.lat, x.lng),
+						image: new kakao.maps.MarkerImage(marker_image(i++, g), new kakao.maps.Size(32, 32)),
+					}));
+
+					// console.log(sub_tar);
+
+					polylines[g] = new kakao.maps.Polyline({
+						map: kakao_map,
+						path: paths[g],
+						strokeWidth: 5,
+						strokeColor: "#000000",
+						strokeStyle: "solid",
+						strokeOpacity: 0.6,
+					});
+
+					overlays[g] = sub_tar.map((x) => {
+						let content = `<div class="overlay\" style="background:rgba(255,255,255,0.9); border-radius:4px; border:1px solid; padding:0 2px;">`;
+						content += `${x.name}<br/>${x.addr}`;
+						content += `</div>`;
+
+						return new kakao.maps.CustomOverlay({
+							map: kakao_map,
+							position: new kakao.maps.LatLng(x.lat, x.lng),
+							content: content,
+							xAnchor: 0,
+							yAnchor: 0.1,
+							// zIndex: 9999,
+						});
+					});
+				}
+			} catch(e) {
+				msg.innerHTML = "카카오지도 위에 마커 등 표시에 기술적 문제 발생";
+				console.log(e);
+				return;
+			}
+
+			msg.innerHTML = "이동경로찾기 종료";
+
+			console.log(polylines);
+
+		})().finally(() => {
+			clearInterval(interval);
+		});
+
+		
+	}
+
+	function marker_image(i, g) {
+		let colors = [
+			"rgba(0,255,0,0.7)",
+			"rgba(255,0,0,0.7)",
+			"rgba(0,0,255,0.7)",
+			"rgba(255,255,0,0.7)",
+			"rgba(0,255,255,0.7)",
+			"rgba(255,0,255,0.7)",
+			"rgba(127,255,0,0.7)",
+			"rgba(127,127,127,0.7)",
+			"rgba(0,255,127,0.7)",
+			"rgba(0,127,255,0.7)",
+		];
 		return 'data:image/svg+xml,' + encodeURIComponent(
-			`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cy='50' cx='50' r='50' stroke-width='0' stroke='#000' fill='rgba(0,255,0,0.7)'/>
+			`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cy='50' cx='50' r='50' stroke-width='0' stroke='#000' fill='${colors[g]}'/>
 				<text x="51" y="45" font-size="80" text-anchor="middle" alignment-baseline="central" fill="#000">
-					${i + 1}
+					${i}
 				</text>	
 			</svg>`
 		);
 	}
-	
-	
 </script>
