@@ -9,19 +9,25 @@ import Base from "../layouts/Base.astro";
 				<div class="flex-[0_0_48px] flex justify-center items-center gap-x-10 border-b">
 					<!-- <div x-data> -->
 					<button x-data @click="$store.global.docsOpen = !$store.global.docsOpen;" class="btn" id="showdocs">설명서 보여줘</button>
-					<button class="btn" id="findpath">최적경로 찾아줘</button>
+					<button x-data @click="findpath();" class="btn"">최적경로 찾아줘</button>
 					<button x-data @click="$store.global.showDetail = !$store.global.showDetail;" class="btn" id="showoverlays">마커표시자세히</button>
 				</div>
 				<div x-data class="flex-[0_0_48px] flex gap-x-6 border-b">
 					<div>
 						<div>그룹 수</div>
-						<input type="number" x-model.number="$store.global.countGroups" min="1" max="10" class="w-[64px] h-8 px-1 border border-gray-300 rounded text-center text-sm"/>
+						<input id="countGoups" type="number" x-model.number="$store.global.countGroups" min="1" max="10" class="w-[64px] h-8 px-1 border border-gray-300 rounded text-center text-sm"/>
 					</div>
 					<div class="flex flex-wrap gap-x-6 items-center">
-						<template x-for="i in $store.global.range" :key="i">
-							<!-- <div x-text="i"></div> -->
-							 <label><input type="checkbox" alt="" checked><span x-text="`그룹 ${i}`"></span></label>
-						</template>
+						<label x-data="{visible: true}"><input type="checkbox" alt="0" :checked="true" :disabled="$store.global.countGroups <= 0" @click="visible=!visible;toggle(0, visible);"><span>그룹 0</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="1" :checked="true" :disabled="$store.global.countGroups <= 1" @click="visible=!visible;toggle(1, visible);"><span>그룹 1</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="2" :checked="true" :disabled="$store.global.countGroups <= 2" @click="visible=!visible;toggle(2, visible);"><span>그룹 2</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="3" :checked="true" :disabled="$store.global.countGroups <= 3" @click="visible=!visible;toggle(3, visible);"><span>그룹 3</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="4" :checked="true" :disabled="$store.global.countGroups <= 4" @click="visible=!visible;toggle(4, visible);"><span>그룹 4</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="5" :checked="true" :disabled="$store.global.countGroups <= 5" @click="visible=!visible;toggle(5, visible);"><span>그룹 5</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="6" :checked="true" :disabled="$store.global.countGroups <= 6" @click="visible=!visible;toggle(6, visible);"><span>그룹 6</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="7" :checked="true" :disabled="$store.global.countGroups <= 7" @click="visible=!visible;toggle(7, visible);"><span>그룹 7</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="8" :checked="true" :disabled="$store.global.countGroups <= 8" @click="visible=!visible;toggle(8, visible);"><span>그룹 8</span></label>
+						<label x-data="{visible: true}"><input type="checkbox" alt="9" :checked="true" :disabled="$store.global.countGroups <= 9" @click="visible=!visible;toggle(9, visible);"><span>그룹 9</span></label>
 					</div>
 				</div>
 				<div class="flex-[0_0_32px]">
@@ -63,6 +69,7 @@ import Base from "../layouts/Base.astro";
 </style>
 
 <script is:inline>
+
 	// alpinejs 전역변수 초기화
 	document.addEventListener("alpine:init", () => {
 		Alpine.store("global", {
@@ -79,7 +86,7 @@ import Base from "../layouts/Base.astro";
 	const MAX_ROWS = 100;
 	const MAX_COLS = 3;
 	const el = document.getElementById("spreadsheet");
-	const findpath = document.getElementById("findpath");
+	// const findpath = document.getElementById("findpath");
 	const msg = document.getElementById("msg");
 	
 
@@ -105,71 +112,92 @@ import Base from "../layouts/Base.astro";
 
 	const kakao_key = "5584c9f9d2b08e7975a38029e42d9790";
 	const map = document.getElementById("map");
-	let markers = []; // 지도 마커들
-	let routing = []; // 이동경로 좌표들
-	let polyline = undefined; // 이동경로 좌표들로 만든 지도 표시용 객체
 	const map_options = {
 		center: new kakao.maps.LatLng(37.5820926424763, 126.888984720113),
 		level: 7,
 	};
 	const kakao_map = new kakao.maps.Map(map, map_options);
 
-	
-	findpath.onclick = async (e) => {
-		msg.innerHTML = "";
+	let markers = {}; // 마커
+	let paths = {}; // 경로추적 보조
+	let polylines = {}; // 경로표시
+	let overlays = {}; // 오버레이
+
+
+	const toggle = (g, visible) => {
+		markers[g]?.forEach((x) => x.setMap(visible ? kakao_map : null));
+		polylines[g]?.setMap(visible ? kakao_map : null);
+		overlays[g]?.forEach((x) => x.setMap(visible ? kakao_map : null));
+	};
+
+	//-> findpath
+	const findpath = async (e) => {
+
+
+		//--> 변수 초기화
+		msg.innerHTML = "이동경로 찾기 시작"; 
 		let src = spreadsheet.getData();
 		let tar = [];
 
-		// 스프레드시트 스타일 초기화
+		//--> 스프레드시트 스타일 초기화
 		try {
 			const all_tr = el.querySelectorAll("table tbody tr");
 			for (let x of all_tr) x.classList.remove("warn");
 		} catch(e) {
-			msg.innerHTML = "스프레드시트에 기술적인 문제가 발생했습니다.";
-			console.log(e);
-			return;
-		}
-
-		// 지도 초기화 (기존 마커, 이동경로 삭제)
-		try {
-			markers.forEach((marker) => { marker.setMap(null); });
-			polyline?.setMap(null);
-			polyline = undefined;
-			routing = [];
-		} catch(e) {
-			msg.innerHTML = "기존 마커/이동경로 삭제하는 과정에서 기술적인 문제가 발생했습니다.";
+			msg.innerHTML = "스프레드시트 초기화 실패";
 			console.log(e);
 			return;
 		}
 		
-		// 주소->좌표 변환
+		//--> 지도 초기화
 		try {
-			// [x, y, g] = 업체명, 주소, 그룹
-			for (let [i, [x, y, g]] of src.entries()) {
-				if (x.trim().length === 0 || y.trim().length === 0) continue;
+			for (let [g, sub] of Object.entries(markers)) sub.forEach((x) => x.setMap(null));
+			for (let [g, sub] of Object.entries(polylines)) sub.setMap(null); //sub.forEach((y) => y.setMap(null));
+			for (let [g, sub] of Object.entries(overlays)) sub.forEach((z) => z.setMap(null));
+			markers = {};
+			paths = {};
+			polylines = {};
+			overlays = {};
+		} catch(e) {
+			msg.innerHTML = "카카오지도 초기화 실패";
+			console.log(e);
+			return;
+		}
 
-				let res = await fetch(`https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(y)}`, {
+		//--> 주소->좌표
+		try {
+			for (let [i, [name, addr, _]] of src.entries()) {
+				if (name.trim().length === 0 || addr.trim().length === 0) continue;
+
+				let res = await fetch(`https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(addr)}`, {
 					method: "GET",
-					headers: {
+					headers: { 
 						Authorization: `KakaoAK ${kakao_key}`,
 					}
 				});
 				let obj = await res.json();
 
-				tar.push([i, x, y, obj?.documents?.[0]?.x, obj?.documents?.[0]?.y, g]);
+				tar.push({
+					i,
+					name,
+					addr,
+					lng: +obj?.documents?.[0]?.x,
+					lat: +obj?.documents?.[0]?.y,
+					g: 0,
+				});
 			}
 		} catch(e) {
-			msg.innerHTML = "주소->좌표 변환하는 KAKAO MAP API에 뭔가 문제가 있습니다.";
+			msg.innerHTML = "카카오지도 API 호출 실패";
 			console.log(e);
 			return;
 		}
 
-		// 변환된 좌표에 문제가 없는지 검사
+		//--> 좌표 검증
 		try {
 			let is_err = false;
 
-			for (let [i, _x, _y, z, _w, g] of tar) {
-				if (z === undefined) {
+			for (let { i, lng } of tar) {
+				if (!lng) {
 					is_err = true;
 					el.querySelector(`table tbody tr[data-y="${i}"]`).classList.add("warn");
 				}
@@ -178,18 +206,19 @@ import Base from "../layouts/Base.astro";
 			if (is_err) throw new Error("주소 오류");
 
 		} catch(e) {
-			msg.innerHTML = "카카오 지도가 인식을 못하는 주소가 있어 수정이 필요합니다.";
+			msg.innerHTML = "카카오지도 API 주소 인식 실패 (아래 붉은색 표시 부분 확인해주세요.)";
 			console.log(e);
 			return;
 		}
 
-
-		// tar 배열에 아무것도 없다면 그냥 종료
+		//--> tar 배열이 비어있다면 그냥 종료
 		if (tar.length === 0) {
-			msg.innerHTML = "동선을 추적할 업체명과 주소가 없습니다.";
-			return;
-		} 
+			msg.innerHTML = "동선을 추적할 업체명, 주소 없음";
+			console.log(e);
+			return ;
+		}
 
+		//--> 최적 경로 찾기 로딩화면?
 		let tail = ".";
 		let interval = setInterval(() => {
 			if (tail.length % 10 === 0) {
@@ -200,43 +229,51 @@ import Base from "../layouts/Base.astro";
 			msg.innerHTML = "최적 경로를 찾고 있습니다" + tail;
 		}, 500);
 
-		// TSP 알고리즘 적용
-		try {
-			
-			// msg.innerHTML = "최적 경로를 찾고 있습니다....";
+		//--> 비동기로 mtsp 알고리즘 실행
+		(async () => {
 
-			// tar = [기존순서, 업체명, 주소, 경도, 위도, 그룹]
-			// tar = solveTSP(tar);
-			// console.log(tar);
-			// console.log(res);
+			let data = {
+				items: tar,
+				k: +document.querySelector("#countGoups").value, //Alpine.store("global").countGroups,
+			};
 
-			console.log(tar);
-			const worker = new Worker("tsp.js");
+			//---> Deno mtsp API 호출하여 mtsp 알고리즘 적용
+			try {
+				let res = await fetch("https://ezapi.ehzilehzil.deno.net/mtsp", {
+					method: "POST",
+					headers: { 
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(data),
+				});
+				if (!res.ok) throw new Error();
 
-			worker.onmessage = async (e) => {
-				tar = e.data;
-				clearInterval(interval);
-				interval = null;
+				tar = await res.json();
+			} catch(e) {
+				msg.innerHTML = "Deno mtsp API 호출 실패";
+				console.log(e);
+				return;
+			}
 
-				// 최적경로를 스프레드시트에 다시 표시
-				try {
-					spreadsheet.setData(tar.map(([_i, a, b, _x, _y]) => [a, b]));
+			//--> 최적경로를 스프레드시트에 다시 표시
+			try {
+				spreadsheet.setData(tar.map((x) => [x.name, x.addr, x.g]));
+			} catch(e) {
+				msg.innerHTML = "스프레드시트에 기술적 문제 발생";
+				console.log(e);
+				return;
+			}
 
-					msg.innerHTML = "최적 경로를 찾았습니다. 위부터 순서대로 방문하면 됩니다.";
-				} catch(e) {
-					msg.innerHTML = "스프레드시트에 기술적인 문제가 발생했습니다.";
-					console.log(e);
-					return;;
-				}
-				
-				// 실제 이동 경로 추적
-				try {
-					const body = {
-						origin: { x: tar[0][3], y: tar[0][4] },
-						destination: { x: tar[tar.length - 1][3], y: tar[tar.length - 1][4] },
-						waypoints: tar.map(([_i, a, _b, x, y]) => ({ name: a, x: x, y: y })).slice(1, -1),
-						priority: "RECOMMEND"
-					};
+			//--> 이동경로 추적
+			let by_g;
+			try {
+				by_g = tar.reduce((a, x) => {
+					(a[x.g] ||= []).push(x);
+					return a;
+				}, {});
+
+				for (let [g, sub_tar] of Object.entries(by_g)) {
+					if (sub_tar.length === 0) continue;
 
 					let res = await fetch('https://apis-navi.kakaomobility.com/v1/waypoints/directions', {
 						method: 'POST',
@@ -244,103 +281,108 @@ import Base from "../layouts/Base.astro";
 							'Authorization': `KakaoAK ${kakao_key}`,
 							'Content-Type': 'application/json'
 						},
-						body: JSON.stringify(body)
+						body: JSON.stringify({
+							origin: { x: sub_tar[0].lng, y: sub_tar[0].lat },
+							destination: { x: sub_tar[sub_tar.length - 1].lng, y: sub_tar[sub_tar.length - 1].lat },
+							waypoints: sub_tar.map((x) => ({ x: x.lng, y: x.lat })).slice(1, -1),
+							priority: "RECOMMEND"
+						}),
 					});
+					// console.log(res);
 					let obj = await res.json();
-
-					// console.log(obj);
 
 					let tmp = collectValuesByKey(obj, "vertexes");
 					tmp = tmp.flat(Infinity);
 					for (let i = 0; i < tmp.length; i += 2) {
-						routing.push(new kakao.maps.LatLng(tmp[i + 1], tmp[i]));
+
+						(paths[g] ||= []).push(new kakao.maps.LatLng(tmp[i + 1], tmp[i]));
+						
 					}
-					
-				} catch(e) {
-					msg.innerHTML = "카카오 지도 이동 경로 API 에 기술적인 문제가 발생했습니다.";
-					console.log(e);
-					return;
 				}
+			} catch(e) {
+				msg.innerHTML = "카카오지도 경로찾기 API에 기술적 문제 발생";
+				console.log(e);
+				return;
+			}
 
-				// 지도에 마커/이동경로 표시
-				try {
-					kakao_map.panTo(new kakao.maps.LatLng(tar[0][4], tar[0][3]));
+			//--> 카카오지도에 마커+이동경로+오버레이 표시
+			try {
+				kakao_map.panTo(new kakao.maps.LatLng(tar[0].lat, tar[0].lng));
 
-					markers = tar.map(([_i, a, b, x, y], i) => new kakao.maps.Marker({
+				
+				for (let [g, sub_tar] of Object.entries(by_g)) {
+					if (sub_tar.length === 0) continue;
+
+					let i = 1;
+
+					markers[g] = sub_tar.map((x) => new kakao.maps.Marker({
 						map: kakao_map,
-						position: new kakao.maps.LatLng(y, x),
-						// title: a + "\n" + b,
-						// image: new kakao.maps.MarkerImage(marker_image(tag), new kakao.maps.Size(icon_size, icon_size)),
-						image: new kakao.maps.MarkerImage(marker_image(i), new kakao.maps.Size(32, 32)),
+						position: new kakao.maps.LatLng(x.lat, x.lng),
+						image: new kakao.maps.MarkerImage(marker_image(i++, g), new kakao.maps.Size(32, 32)),
 					}));
 
-					polyline = new kakao.maps.Polyline({
+					// console.log(sub_tar);
+
+					polylines[g] = new kakao.maps.Polyline({
 						map: kakao_map,
-						path: routing,
+						path: paths[g],
 						strokeWidth: 5,
 						strokeColor: "#000000",
 						strokeStyle: "solid",
 						strokeOpacity: 0.6,
 					});
 
-					tar.forEach(([i, a, b, x, y]) => {
+					overlays[g] = sub_tar.map((x) => {
 						let content = `<div class="overlay\" style="background:rgba(255,255,255,0.9); border-radius:4px; border:1px solid; padding:0 2px;">`;
-						content += `${a}<br/>${b}`;
+						content += `${x.name}<br/>${x.addr}`;
 						content += `</div>`;
 
-						let overlay = new kakao.maps.CustomOverlay({
+						return new kakao.maps.CustomOverlay({
 							map: kakao_map,
-							position: new kakao.maps.LatLng(y, x),
+							position: new kakao.maps.LatLng(x.lat, x.lng),
 							content: content,
 							xAnchor: 0,
 							yAnchor: 0.1,
 							// zIndex: 9999,
 						});
 					});
-
-				} catch(e) {
-					msg.innerHTML = "카카오 지도 이동 경로 지도 표시에 기술적인 문제가 발생했습니다.";
-					console.log(e);
-					return;
 				}
+			} catch(e) {
+				msg.innerHTML = "카카오지도 위에 마커 등 표시에 기술적 문제 발생";
+				console.log(e);
+				return;
+			}
 
+			msg.innerHTML = "이동경로찾기 종료";
 
+			console.log(polylines);
 
-			}; // worker.onmessage
-
-		} catch(e) {
+		})().finally(() => {
 			clearInterval(interval);
-			interval = null;
-			msg.innerHTML = "TSP 알고리즘 적용에 문제가 생겼습니다.";
-			console.log(e);
-			return;
-		}
+		});
 
 		
-	};
+	}
 
-	// (i, g) = 이동순서, 그룹
 	function marker_image(i, g) {
 		let colors = [
-			rgba(0,255,0,0.7),
-			rgba(255,0,0,0.7),
-			rgba(0,0,255,0.7),
-			rgba(255,255,0,0.7),
-			rgba(0,255,255,0.7),
-			rgba(255,0,255,0.7),
-			rgba(127,255,0,0.7),
-			rgba(127,127,127,0.7),
-			rgba(0,255,127,0.7),
-			rgba(0,127,255,0.7),
+			"rgba(0,255,0,0.7)",
+			"rgba(255,0,0,0.7)",
+			"rgba(0,0,255,0.7)",
+			"rgba(255,255,0,0.7)",
+			"rgba(0,255,255,0.7)",
+			"rgba(255,0,255,0.7)",
+			"rgba(127,255,0,0.7)",
+			"rgba(127,127,127,0.7)",
+			"rgba(0,255,127,0.7)",
+			"rgba(0,127,255,0.7)",
 		];
 		return 'data:image/svg+xml,' + encodeURIComponent(
 			`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cy='50' cx='50' r='50' stroke-width='0' stroke='#000' fill='${colors[g]}'/>
 				<text x="51" y="45" font-size="80" text-anchor="middle" alignment-baseline="central" fill="#000">
-					${i + 1}
+					${i}
 				</text>	
 			</svg>`
 		);
 	}
-	
-	
 </script>
